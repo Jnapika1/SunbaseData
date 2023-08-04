@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        #myTable td:nth-child(9),th:nth-child(9){
+   display: none;
+}
+body{
+    padding: 2% 10%;
+}
+    </style>
+</head>
+<body>
+    <button class="btn btn-sm btn-primary" id="add_customer" onclick="location.href='../views/addcustomer.html'">Add Customer</button>
+    <table id="myTable" class="table">
+        <tr>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Address</th>
+            <th scope="col">City</th>
+            <th scope="col">State</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Action</th>
+            <th scope="col">uuid</th>
+        </tr>
+    </table>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script>
+        const table = document.getElementById('myTable');
+        window.addEventListener('DOMContentLoaded', ()=>{
+            axios.get('http://localhost:3000/customers')
+            .then(response=>{
+                console.log(response.data.customers);
+                addRow(response.data.customers);
+            })
+            .catch(err=>{
+                console.log(err);
+            })
+        })
+        function addRow(arr){
+            for(let k=0;k<arr.length;k++){
+                let rowCount = table.rows.length;
+            let row=table.insertRow(rowCount);
+            let cell;
+            let cellCount = table.rows[0].cells.length; 
+        for(let i =0; i<cellCount; i++){
+            cell = row.insertCell(i);
+            cell.scope="col"
+                switch (i){
+                    case 0: cell.innerHTML=arr[k].first_name;
+                            break;
+                    case 1: cell.innerHTML =arr[k].last_name;
+                    break;
+                    case 2: cell.innerHTML=arr[k].email;
+                            break;
+                    case 3: cell.innerHTML =arr[k].address;
+                    break;
+                    case 4: cell.innerHTML=arr[k].city;
+                            break;
+                    case 5: cell.innerHTML =arr[k].state;
+                    break;
+                    case 6: cell.innerHTML =arr[k].phone;
+                    break;
+                    case 7: cell.innerHTML='<input type="button" class="btn btn-sm btn-danger" value="delete" onclick="deleteRow(this)" /> <input type="button" class="btn btn-sm btn-success" value="edit" onclick="editRow(this)" />';
+                    break;
+                    case 8: cell.innerHTML=arr[k].uuid;
+                    break;
+                    default: cell.innerHTML=arr[k].city
+                }
+                // console.log(arr[k].first_name);
+        }
+            }
+            
+        }
+
+        function deleteRow(ele){
+
+            let reqCell = (ele.parentNode.parentNode.cells[3].innerHTML);
+            console.log(reqCell);
+            axios.get('http://localhost:3000/customers')
+            .then(response=>{
+                let arr = response.data.customers;
+                for(let k=0; k<arr.length;k++){
+                if(arr[k].uuid===reqCell){
+                    axios.post('http://localhost:3000/delete', {uuid: reqCell})
+                    .then(response=>{
+                        ele.parentNode.parentNode.remove();
+                    })
+                    .catch(err=>console.log(err));
+                }
+            }
+                // console.log(response.data.customers);
+                // addRow(response.data.customers);
+            })
+            .catch(err=>{
+                console.log(err);
+                window.location.replace("../views/login.html");
+            })
+        
+        }
+
+        function editRow(ele){
+
+            let reqCell = (ele.parentNode.parentNode.cells[3].innerHTML);
+            console.log(reqCell);
+            localStorage.setItem('editUUID', reqCell);
+            window.location.replace('../views/updatecustomer.html');
+    }   
+
+    </script>
+</body>
+</html>
